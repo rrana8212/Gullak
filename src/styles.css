@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+
+  --color-background: #f3efe8;
+  --color-foreground: #1a1916;
+  --color-card: #fffcf7;
+  --color-card-foreground: #1a1916;
+  --color-muted: #ebe6dc;
+  --color-muted-foreground: #6f6b64;
+  --color-faint: #9a958c;
+  --color-border: #e4dfd6;
+  --color-primary: #243d30;
+  --color-primary-foreground: #f3efe8;
+  --color-income: #2d6a4f;
+  --color-income-soft: #e4f0e8;
+  --color-expense: #9b3d2f;
+  --color-expense-soft: #f6e6e2;
+  --color-ring: #243d30;
+  --color-nav: #fffcf7;
+  --color-overlay: rgb(26 25 22 / 0.4);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+
+  --shadow-card:
+    0 0 0 1px rgb(26 25 22 / 0.05),
+    0 1px 2px -1px rgb(26 25 22 / 0.06),
+    0 8px 24px -12px rgb(26 25 22 / 0.08);
+  --shadow-nav:
+    0 -1px 0 rgb(26 25 22 / 0.05),
+    0 -8px 24px -16px rgb(26 25 22 / 0.12);
+  --shadow-fab:
+    0 0 0 1px rgb(36 61 48 / 0.1),
+    0 8px 20px -6px rgb(36 61 48 / 0.45);
+
+  --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --max-width-phone: 26.875rem;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100dvh;
+    background: var(--color-muted);
+    color: var(--color-foreground);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

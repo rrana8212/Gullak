@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build / framework
+.tanstack/
+.vercel/
+.output/
+dist/
+.nitro/
+
+# local / secrets
+.env
+.env.*
+.project_id
+.node_modules.lock
+
+# grok workspace (keep only the auth flag the app reads)
+.grok/*
+!.grok/app-env.json
+
+# sandbox noise
+artifacts/
+screenshots/
+*.log
+.DS_Store
+AGENTS.md
+AGENTS.project.md
