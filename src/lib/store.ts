@@ -1,5 +1,13 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import {
+  EMPTY_BILLING,
+  EMPTY_LOAN,
+  type CardEntry,
+  type CardEntryType,
+  type CardId,
+  type LoanState,
+} from "./accounts";
 import { monthKeyFromDate } from "./format";
 import { buildDemoTransactions } from "./seed";
 import type { CategoryId, Transaction, TxType } from "./types";
@@ -14,6 +22,9 @@ interface ExpenseState {
   initialized: boolean;
   monthKey: string;
   sheet: SheetState;
+  cardEntries: CardEntry[];
+  billingDates: Record<CardId, string>;
+  loan: LoanState;
   hydrateDemo: () => void;
   restoreSample: () => void;
   setMonthKey: (monthKey: string) => void;
@@ -39,6 +50,20 @@ interface ExpenseState {
   ) => void;
   removeTransaction: (id: string) => void;
   clearAll: () => void;
+  setBillingDate: (accountId: CardId, date: string) => void;
+  addCardEntry: (input: {
+    accountId: CardId;
+    type: CardEntryType;
+    amount: number;
+    note: string;
+    date: string;
+  }) => void;
+  updateCardEntry: (
+    id: string,
+    input: { type: CardEntryType; amount: number; note: string; date: string },
+  ) => void;
+  removeCardEntry: (id: string) => void;
+  setLoan: (loan: LoanState) => void;
 }
 
 function newId(): string {
@@ -59,6 +84,9 @@ export const useExpenseStore = create<ExpenseState>()(
       initialized: true,
       monthKey: monthKeyFromDate(new Date()),
       sheet: { mode: "closed" },
+      cardEntries: [],
+      billingDates: { ...EMPTY_BILLING },
+      loan: { ...EMPTY_LOAN },
       hydrateDemo: () => {
         const { initialized, transactions } = get();
         if (initialized || transactions.length > 0) {
@@ -108,6 +136,23 @@ export const useExpenseStore = create<ExpenseState>()(
         });
       },
       clearAll: () => set({ transactions: [], initialized: true, sheet: { mode: "closed" } }),
+      setBillingDate: (accountId, date) =>
+        set({ billingDates: { ...get().billingDates, [accountId]: date } }),
+      addCardEntry: (input) => {
+        const entry: CardEntry = { id: newId(), ...input, createdAt: Date.now() };
+        set({ cardEntries: [entry, ...get().cardEntries] });
+      },
+      updateCardEntry: (id, input) => {
+        set({
+          cardEntries: get().cardEntries.map((entry) =>
+            entry.id === id ? { ...entry, ...input } : entry,
+          ),
+        });
+      },
+      removeCardEntry: (id) => {
+        set({ cardEntries: get().cardEntries.filter((entry) => entry.id !== id) });
+      },
+      setLoan: (loan) => set({ loan }),
     }),
     {
       name: "hisab-ledger",
@@ -118,7 +163,20 @@ export const useExpenseStore = create<ExpenseState>()(
       partialize: (state) => ({
         transactions: state.transactions,
         initialized: state.initialized,
+        cardEntries: state.cardEntries,
+        billingDates: state.billingDates,
+        loan: state.loan,
       }),
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<ExpenseState>;
+        return {
+          ...current,
+          ...saved,
+          billingDates: { ...EMPTY_BILLING, ...saved.billingDates },
+          loan: { ...EMPTY_LOAN, ...saved.loan },
+          cardEntries: saved.cardEntries ?? [],
+        };
+      },
     },
   ),
 );

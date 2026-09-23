@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Wallet } from "lucide-react";
+import { ChevronRight, CreditCard, Landmark, Wallet } from "lucide-react";
 import { ChartLegend, DualBarChart } from "@/components/charts";
 import { EmptyState } from "@/components/empty-state";
 import { MonthSwitcher } from "@/components/month-switcher";
 import { TotalsStrip } from "@/components/totals-strip";
 import { TransactionRow } from "@/components/transaction-row";
+import { CARD_ACCOUNTS, loanBalance, summarizeCard } from "@/lib/accounts";
 import { formatINR, greetingFor } from "@/lib/format";
 import { useExpenseStore } from "@/lib/store";
 import { useMonthStats } from "@/lib/use-month-stats";
@@ -66,6 +67,20 @@ function Home() {
 
       <section className="mt-4 overflow-hidden rounded-2xl bg-card shadow-card">
         <div className="flex items-center justify-between px-4 pt-4 pb-1">
+          <h2 className="font-display text-lg font-medium tracking-tight">Cards & loan</h2>
+          <Link
+            to="/accounts"
+            className="inline-flex min-h-11 items-center gap-0.5 text-sm font-medium text-muted-foreground"
+          >
+            All
+            <ChevronRight className="size-4" />
+          </Link>
+        </div>
+        <AccountPreview />
+      </section>
+
+      <section className="mt-4 overflow-hidden rounded-2xl bg-card shadow-card">
+        <div className="flex items-center justify-between px-4 pt-4 pb-1">
           <h2 className="font-display text-lg font-medium tracking-tight">Recent</h2>
           <Link
             to="/activity"
@@ -94,5 +109,48 @@ function Home() {
         )}
       </section>
     </main>
+  );
+}
+
+function AccountPreview() {
+  const cardEntries = useExpenseStore((s) => s.cardEntries);
+  const loan = useExpenseStore((s) => s.loan);
+
+  return (
+    <ul className="pb-1">
+      {CARD_ACCOUNTS.map((account) => {
+        const summary = summarizeCard(
+          cardEntries.filter((entry) => entry.accountId === account.id),
+        );
+        return (
+          <li key={account.id} className="border-t border-border">
+            <Link
+              to="/accounts/$id"
+              params={{ id: account.id }}
+              className="flex min-h-14 items-center gap-3 px-4 py-3"
+            >
+              <CreditCard className="size-4 text-muted-foreground" />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">{account.name}</span>
+              <span className="font-display text-sm font-medium tabular-nums">
+                {formatINR(summary.balance)}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+      <li className="border-t border-border">
+        <Link
+          to="/accounts/$id"
+          params={{ id: "axis" }}
+          className="flex min-h-14 items-center gap-3 px-4 py-3"
+        >
+          <Landmark className="size-4 text-muted-foreground" />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">Axis Bank loan</span>
+          <span className="font-display text-sm font-medium tabular-nums">
+            {formatINR(loanBalance(loan))}
+          </span>
+        </Link>
+      </li>
+    </ul>
   );
 }
